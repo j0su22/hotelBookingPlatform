@@ -16,6 +16,9 @@ public sealed class RoomInventoryRepository(BookingDbContext context) : IRoomInv
 
     public void Add(RoomInventory inventory) => context.RoomInventories.Add(inventory);
 
+    public void AddRange(IEnumerable<RoomInventory> inventories) =>
+        context.RoomInventories.AddRange(inventories);
+
     public void UpdateRange(IEnumerable<RoomInventory> inventories) =>
         context.RoomInventories.UpdateRange(inventories);
 }
