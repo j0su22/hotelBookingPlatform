@@ -1,0 +1,20 @@
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /app
+
+COPY HotelBookingPlatform.sln ./
+COPY src/HotelBookingPlatform.Domain/HotelBookingPlatform.Domain.csproj              src/HotelBookingPlatform.Domain/
+COPY src/HotelBookingPlatform.Application/HotelBookingPlatform.Application.csproj    src/HotelBookingPlatform.Application/
+COPY src/HotelBookingPlatform.Infrastructure/HotelBookingPlatform.Infrastructure.csproj src/HotelBookingPlatform.Infrastructure/
+COPY src/HotelBookingPlatform.Api/HotelBookingPlatform.Api.csproj                    src/HotelBookingPlatform.Api/
+
+RUN dotnet restore src/HotelBookingPlatform.Api/HotelBookingPlatform.Api.csproj
+
+COPY src/ src/
+RUN dotnet publish src/HotelBookingPlatform.Api/HotelBookingPlatform.Api.csproj \
+    -c Release -o /out --no-restore
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
+WORKDIR /app
+COPY --from=build /out .
+EXPOSE 8080
+ENTRYPOINT ["dotnet", "HotelBookingPlatform.Api.dll"]
