@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /app
 
-COPY HotelBookingPlatform.sln ./
+COPY HotelBookingPlatform.slnx ./
 COPY src/HotelBookingPlatform.Domain/HotelBookingPlatform.Domain.csproj              src/HotelBookingPlatform.Domain/
 COPY src/HotelBookingPlatform.Application/HotelBookingPlatform.Application.csproj    src/HotelBookingPlatform.Application/
 COPY src/HotelBookingPlatform.Infrastructure/HotelBookingPlatform.Infrastructure.csproj src/HotelBookingPlatform.Infrastructure/
