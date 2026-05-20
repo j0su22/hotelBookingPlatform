@@ -1,0 +1,424 @@
+{
+  "info": {
+    "name": "Hotel Booking Platform",
+    "_postman_id": "hbp-collection-v1",
+    "description": "Complete API collection for the Hotel Booking Platform technical test.\n\n**Setup:**\n1. Set `baseUrl` variable to `http://localhost:5000`\n2. Run `POST Auth / Get Token` to populate `{{token}}` automatically\n3. Use `Idempotency-Key` is auto-generated via pre-request script on all POST/PUT booking requests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl",    "value": "http://localhost:5000", "type": "string" },
+    { "key": "token",      "value": "",                      "type": "string" },
+    { "key": "hotelId",    "value": "",                      "type": "string" },
+    { "key": "roomTypeId", "value": "",                      "type": "string" },
+    { "key": "ratePlanId", "value": "",                      "type": "string" },
+    { "key": "bookingId",  "value": "",                      "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Get Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('token', json.token);",
+                  "  pm.test('Token received', () => pm.expect(json.token).to.be.a('string'));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"Admin123!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/token",
+            "description": "Returns a JWT bearer token. Credentials: admin / Admin123!"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Hotels",
+      "item": [
+        {
+          "name": "List Hotels (paged)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data.length > 0) {",
+                  "  pm.collectionVariables.set('hotelId', json.data[0].id);",
+                  "  pm.test('Has hotels', () => pm.expect(json.data).to.have.length.above(0));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/hotels?pageNumber=1&pageSize=10&sortBy=Name&sortDirection=asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "hotels"],
+              "query": [
+                { "key": "pageNumber",     "value": "1" },
+                { "key": "pageSize",       "value": "10" },
+                { "key": "sortBy",         "value": "Name" },
+                { "key": "sortDirection",  "value": "asc" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Hotel by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/hotels/{{hotelId}}"
+          }
+        },
+        {
+          "name": "Create Hotel",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Hotel Demo\",\n  \"address\": \"123 Main St\",\n  \"city\": \"San Salvador\",\n  \"country\": \"El Salvador\",\n  \"starRating\": 4\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/hotels"
+          }
+        },
+        {
+          "name": "Update Hotel",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Hotel Demo Updated\",\n  \"address\": \"456 Main St\",\n  \"city\": \"San Salvador\",\n  \"country\": \"El Salvador\",\n  \"starRating\": 5\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/hotels/{{hotelId}}"
+          }
+        },
+        {
+          "name": "Delete Hotel",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/v1/hotels/{{hotelId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Room Types",
+      "item": [
+        {
+          "name": "List Room Types by Hotel",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "if (Array.isArray(json) && json.length > 0) {",
+                  "  pm.collectionVariables.set('roomTypeId', json[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/hotels/{{hotelId}}/room-types"
+          }
+        },
+        {
+          "name": "Create Room Type",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Deluxe Suite\",\n  \"description\": \"Spacious suite with ocean view\",\n  \"maxCapacity\": 3,\n  \"basePrice\": 200.00\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/hotels/{{hotelId}}/room-types"
+          }
+        },
+        {
+          "name": "Update Room Type",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Deluxe Suite Updated\",\n  \"description\": \"Updated description\",\n  \"maxCapacity\": 4,\n  \"basePrice\": 250.00\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/hotels/{{hotelId}}/room-types/{{roomTypeId}}"
+          }
+        },
+        {
+          "name": "Delete Room Type",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/v1/hotels/{{hotelId}}/room-types/{{roomTypeId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rate Plans",
+      "item": [
+        {
+          "name": "List Rate Plans by Room Type",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "if (Array.isArray(json) && json.length > 0) {",
+                  "  pm.collectionVariables.set('ratePlanId', json[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/rate-plans?roomTypeId={{roomTypeId}}"
+          }
+        },
+        {
+          "name": "Calculate Price",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rate-plans/calculate-price?roomTypeId={{roomTypeId}}&checkIn=2026-06-01&checkOut=2026-06-05",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "rate-plans", "calculate-price"],
+              "query": [
+                { "key": "roomTypeId", "value": "{{roomTypeId}}" },
+                { "key": "checkIn",    "value": "2026-06-01" },
+                { "key": "checkOut",   "value": "2026-06-05" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Rate Plan",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomTypeId\": \"{{roomTypeId}}\",\n  \"name\": \"Summer Rate\",\n  \"pricePerNight\": 150.00,\n  \"validFrom\": \"2026-06-01\",\n  \"validTo\": \"2026-08-31\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/rate-plans"
+          }
+        },
+        {
+          "name": "Update Rate Plan",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Summer Rate Updated\",\n  \"pricePerNight\": 175.00,\n  \"validFrom\": \"2026-06-01\",\n  \"validTo\": \"2026-08-31\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/rate-plans/{{ratePlanId}}"
+          }
+        },
+        {
+          "name": "Delete Rate Plan",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/v1/rate-plans/{{ratePlanId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Availability",
+      "item": [
+        {
+          "name": "Get Availability",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/availability?hotelId={{hotelId}}&checkIn=2026-06-01&checkOut=2026-06-05&guests=2",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "availability"],
+              "query": [
+                { "key": "hotelId",   "value": "{{hotelId}}" },
+                { "key": "checkIn",   "value": "2026-06-01" },
+                { "key": "checkOut",  "value": "2026-06-05" },
+                { "key": "guests",    "value": "2" }
+              ]
+            },
+            "description": "Returns available room types with best rates for the given date range"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Create Booking",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.request.headers.add({ key: 'Idempotency-Key', value: pm.variables.replaceIn('{{$guid}}') });"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "if (json.bookingId) {",
+                  "  pm.collectionVariables.set('bookingId', json.bookingId);",
+                  "  pm.test('Has confirmation number', () => pm.expect(json.confirmationNumber).to.match(/^HBP-/));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomTypeId\": \"{{roomTypeId}}\",\n  \"checkIn\": \"2026-06-01\",\n  \"checkOut\": \"2026-06-05\",\n  \"guestCount\": 2,\n  \"guestFirstName\": \"John\",\n  \"guestLastName\": \"Doe\",\n  \"guestEmail\": \"john.doe@example.com\",\n  \"guestPhone\": \"+50312345678\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/bookings",
+            "description": "Idempotency-Key is auto-generated in the pre-request script. Repeat with the same key to test idempotency replay."
+          }
+        },
+        {
+          "name": "Create Booking (Idempotency Test)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Uses a fixed key — run twice to test idempotent replay",
+                  "pm.request.headers.add({ key: 'Idempotency-Key', value: 'idempotency-test-fixed-key-123' });"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201 or 200', () => pm.expect([200, 201]).to.include(pm.response.code));",
+                  "const replayed = pm.response.headers.get('X-Idempotency-Replayed');",
+                  "if (replayed) pm.test('Replayed header present', () => pm.expect(replayed).to.equal('true'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomTypeId\": \"{{roomTypeId}}\",\n  \"checkIn\": \"2026-07-10\",\n  \"checkOut\": \"2026-07-12\",\n  \"guestCount\": 1,\n  \"guestFirstName\": \"Idempotency\",\n  \"guestLastName\": \"Test\",\n  \"guestEmail\": \"idempotency@example.com\",\n  \"guestPhone\": \"+50300000001\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/bookings"
+          }
+        },
+        {
+          "name": "List Bookings",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bookings?pageNumber=1&pageSize=10&status=Pending",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "bookings"],
+              "query": [
+                { "key": "pageNumber", "value": "1" },
+                { "key": "pageSize",   "value": "10" },
+                { "key": "status",     "value": "Pending" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Booking by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/bookings/{{bookingId}}"
+          }
+        },
+        {
+          "name": "Confirm Booking",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/v1/bookings/{{bookingId}}/confirm"
+          }
+        },
+        {
+          "name": "Cancel Booking",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/v1/bookings/{{bookingId}}/cancel"
+          }
+        }
+      ]
+    }
+  ]
+}
