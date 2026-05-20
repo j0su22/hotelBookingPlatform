@@ -1,0 +1,20 @@
+# Exclude local build artifacts — these contain Windows absolute paths
+# that break the Linux Docker build
+**/bin/
+**/obj/
+
+# Exclude VS folders
+**/.vs/
+**/.vscode/
+
+# Exclude test projects (not needed in API image)
+tests/
+
+# Exclude frontend (built by its own Dockerfile)
+frontend/
+
+# Exclude git/docs
+.git/
+.gitignore
+README.md
+postman/

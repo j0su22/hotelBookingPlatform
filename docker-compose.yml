@@ -1,0 +1,52 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: "${SA_PASSWORD:-HBP_StrongPass123!}"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqldata:/var/opt/mssql
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$$SA_PASSWORD" -C -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Default: "Server=sqlserver,1433;Database=HotelBookingDb;User Id=sa;Password=${SA_PASSWORD:-HBP_StrongPass123!};TrustServerCertificate=True;"
+      Jwt__Key: "${JWT_KEY:-SuperSecretKeyForDemoOnly32Chars!}"
+      Jwt__Issuer: "HotelBookingPlatform"
+      Jwt__ExpiryMinutes: "60"
+      Booking__MaxNights: "30"
+    ports:
+      - "5000:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    restart: on-failure
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      # Used by Server Components at runtime (container-to-container)
+      API_URL: "http://api:8080"
+      # NEXT_PUBLIC_ is baked at build time; this is only a fallback hint
+      NEXT_PUBLIC_API_URL: "http://localhost:5000"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  sqldata:
