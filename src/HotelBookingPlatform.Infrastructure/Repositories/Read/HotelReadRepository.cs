@@ -48,7 +48,7 @@ public sealed class HotelReadRepository(IConfiguration configuration) : IHotelRe
 
     public async Task<HotelDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        const string sql = "SELECT Id, Name, Address, City, Country, StarRating, IsActive, CreatedAt FROM Hotels WHERE Id = @Id AND IsActive = 1";
+        const string sql = "SELECT Id, Name, Address, City, Country, StarRating, IsActive, CreatedAt, 0 AS TotalCount FROM Hotels WHERE Id = @Id AND IsActive = 1";
         await using var conn = CreateConnection();
         var row = await conn.QueryFirstOrDefaultAsync<HotelRow>(sql, new { Id = id });
         if (row is null) return null;

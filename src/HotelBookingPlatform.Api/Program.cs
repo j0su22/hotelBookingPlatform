@@ -125,6 +125,28 @@ try
 
     app.UseSerilogRequestLogging();
     app.UseCors();
+
+    // Global exception handler placed AFTER UseCors so CORS headers are present on 500 responses
+    app.Use(async (context, next) =>
+    {
+        try
+        {
+            await next(context);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Unhandled exception for {Method} {Path}",
+                context.Request.Method, context.Request.Path);
+            if (!context.Response.HasStarted)
+            {
+                context.Response.StatusCode = 500;
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsync(
+                    "{\"title\":\"An unexpected error occurred.\",\"status\":500}");
+            }
+        }
+    });
+
     app.UseMiddleware<CorrelationIdMiddleware>();
     app.UseMiddleware<RequestDurationMiddleware>();
     app.UseMiddleware<IdempotencyMiddleware>();

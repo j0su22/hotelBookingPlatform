@@ -14,15 +14,61 @@ export interface HotelDto {
   country: string;
   starRating: number;
   isActive: boolean;
+  createdAt: string;
 }
 
 export interface RoomTypeDto {
   id: string;
   hotelId: string;
+  hotelName: string;
   name: string;
   description: string;
   maxCapacity: number;
   basePrice: number;
+  isActive: boolean;
+}
+
+export interface CreateHotelRequest {
+  name: string;
+  address: string;
+  city: string;
+  country: string;
+  starRating: number;
+}
+
+export interface UpdateHotelRequest {
+  name: string;
+  address: string;
+  city: string;
+  country: string;
+  starRating: number;
+}
+
+export interface CreateRoomTypeAdminRequest {
+  name: string;
+  description: string;
+  maxCapacity: number;
+  basePrice: number;
+}
+
+export interface UpdateRoomTypeAdminRequest {
+  name: string;
+  description: string;
+  maxCapacity: number;
+  basePrice: number;
+}
+
+export interface InventoryDto {
+  id: string;
+  date: string;          // ISO "YYYY-MM-DD"
+  totalRooms: number;
+  availableRooms: number;
+}
+
+export interface UpsertInventoryRequest {
+  from: string;          // ISO date
+  to: string;            // ISO date (exclusive)
+  totalRooms: number;
 }
 
 export interface AvailabilityDto {
