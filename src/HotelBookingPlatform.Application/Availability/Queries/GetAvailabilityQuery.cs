@@ -7,7 +7,7 @@ using MediatR;
 namespace HotelBookingPlatform.Application.Availability.Queries;
 
 public sealed record GetAvailabilityQuery(
-    Guid HotelId,
+    Guid? HotelId,
     DateOnly CheckIn,
     DateOnly CheckOut,
     int Guests) : IRequest<Result<IReadOnlyList<AvailabilityDto>>>;
@@ -16,11 +16,11 @@ public sealed class GetAvailabilityQueryValidator : AbstractValidator<GetAvailab
 {
     public GetAvailabilityQueryValidator()
     {
-        RuleFor(x => x.HotelId).NotEmpty();
+        // HotelId is optional — omit it to search across all hotels
         RuleFor(x => x.CheckIn).NotEmpty();
         RuleFor(x => x.CheckOut).GreaterThan(x => x.CheckIn)
-            .WithMessage("CheckOut debe ser posterior a CheckIn.");
-        RuleFor(x => x.Guests).GreaterThan(0).WithMessage("Debe haber al menos 1 huésped.");
+            .WithMessage("CheckOut must be after CheckIn.");
+        RuleFor(x => x.Guests).GreaterThan(0).WithMessage("At least 1 guest is required.");
     }
 }
 

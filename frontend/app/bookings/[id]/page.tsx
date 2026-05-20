@@ -8,7 +8,7 @@ interface BookingDetailPageProps {
 }
 
 async function fetchBooking(id: string): Promise<BookingDetailDto | null> {
-  const base = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000';
+  const base = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000';
   const res = await fetch(`${base}/api/v1/bookings/${id}`, { cache: 'no-store' });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error('Failed to load booking');

@@ -13,7 +13,7 @@ public sealed class AvailabilityController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> Search(
-        [FromQuery] Guid hotelId,
+        [FromQuery] Guid? hotelId,
         [FromQuery] DateOnly checkIn,
         [FromQuery] DateOnly checkOut,
         [FromQuery] int guests = 1,

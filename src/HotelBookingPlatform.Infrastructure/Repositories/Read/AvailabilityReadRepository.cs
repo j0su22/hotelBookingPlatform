@@ -12,7 +12,7 @@ public sealed class AvailabilityReadRepository(IConfiguration configuration) : I
         new(configuration.GetConnectionString("Default"));
 
     public async Task<IReadOnlyList<AvailabilityDto>> GetAvailabilityAsync(
-        Guid hotelId, DateOnly checkIn, DateOnly checkOut, int guests, CancellationToken cancellationToken = default)
+        Guid? hotelId, DateOnly checkIn, DateOnly checkOut, int guests, CancellationToken cancellationToken = default)
     {
         var nights = checkOut.DayNumber - checkIn.DayNumber;
 
@@ -35,19 +35,22 @@ public sealed class AvailabilityReadRepository(IConfiguration configuration) : I
                 GROUP BY rp.RoomTypeId
             )
             SELECT
-                rt.Id AS RoomTypeId,
-                rt.Name AS RoomTypeName,
+                rt.Id          AS RoomTypeId,
+                rt.Name        AS RoomTypeName,
                 rt.Description,
+                h.Id           AS HotelId,
+                h.Name         AS HotelName,
+                h.City,
                 rt.MaxCapacity,
-                inv.MinAvailableRooms AS AvailableRooms,
-                COALESCE(ar.BestRate, rt.BasePrice) AS PricePerNight,
-                COALESCE(ar.BestRate, rt.BasePrice) * @Nights AS TotalPrice,
-                @Nights AS Nights
+                inv.MinAvailableRooms                              AS AvailableRooms,
+                COALESCE(ar.BestRate, rt.BasePrice)                AS BestRate,
+                COALESCE(ar.BestRate, rt.BasePrice) * @Nights      AS TotalPrice,
+                @Nights                                            AS Nights
             FROM RoomTypes rt
             INNER JOIN Hotels h ON h.Id = rt.HotelId
             INNER JOIN InventorySummary inv ON inv.RoomTypeId = rt.Id
             LEFT JOIN ActiveRates ar ON ar.RoomTypeId = rt.Id
-            WHERE h.Id = @HotelId
+            WHERE (@HotelId IS NULL OR h.Id = @HotelId)
               AND rt.IsActive = 1
               AND h.IsActive = 1
               AND rt.MaxCapacity >= @Guests

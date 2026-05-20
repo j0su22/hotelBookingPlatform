@@ -13,9 +13,11 @@ interface SearchPageProps {
   }>;
 }
 
+// API_URL = internal Docker URL (container→container); falls back to public URL for local dev
+const serverBase = () => process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000';
+
 async function fetchHotels(): Promise<HotelDto[]> {
-  const base = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000';
-  const res = await fetch(`${base}/api/v1/hotels?pageSize=50`, { cache: 'no-store' });
+  const res = await fetch(`${serverBase()}/api/v1/hotels?pageSize=50`, { cache: 'no-store' });
   if (!res.ok) return [];
   const data: PagedResponse<HotelDto> = await res.json();
   return data.data;
@@ -27,7 +29,7 @@ async function fetchAvailability(
   guests: string,
   hotelId?: string
 ): Promise<AvailabilityDto[]> {
-  const base = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000';
+  const base = serverBase();
   const params = new URLSearchParams({ checkIn, checkOut, guests: guests ?? '1' });
   if (hotelId) params.set('hotelId', hotelId);
   const res = await fetch(`${base}/api/v1/availability?${params}`, { cache: 'no-store' });

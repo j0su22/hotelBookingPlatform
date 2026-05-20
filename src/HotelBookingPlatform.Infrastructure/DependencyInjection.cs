@@ -1,3 +1,4 @@
+using Dapper;
 using HotelBookingPlatform.Application.Interfaces;
 using HotelBookingPlatform.Domain.Interfaces;
 using HotelBookingPlatform.Infrastructure.Persistence;
@@ -14,6 +15,9 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        // Register Dapper type handlers (must be done once, globally)
+        SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+
         services.AddDbContext<BookingDbContext>(options =>
             options.UseSqlServer(
                 configuration.GetConnectionString("Default"),

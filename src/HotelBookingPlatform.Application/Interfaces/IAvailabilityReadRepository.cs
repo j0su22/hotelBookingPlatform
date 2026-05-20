@@ -5,7 +5,7 @@ namespace HotelBookingPlatform.Application.Interfaces;
 public interface IAvailabilityReadRepository
 {
     Task<IReadOnlyList<AvailabilityDto>> GetAvailabilityAsync(
-        Guid hotelId,
+        Guid? hotelId,
         DateOnly checkIn,
         DateOnly checkOut,
         int guests,

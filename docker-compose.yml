@@ -39,6 +39,9 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     environment:
+      # Used by Server Components at runtime (container-to-container)
+      API_URL: "http://api:8080"
+      # NEXT_PUBLIC_ is baked at build time; this is only a fallback hint
       NEXT_PUBLIC_API_URL: "http://localhost:5000"
     ports:
       - "3000:3000"
