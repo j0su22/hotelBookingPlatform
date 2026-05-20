@@ -8,11 +8,22 @@ function getToken(): string | null {
 }
 
 export function clearToken(): void {
-  if (typeof window !== 'undefined') localStorage.removeItem('hbp_token');
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('hbp_token');
+    window.dispatchEvent(new Event('authchange'));
+  }
 }
 
 export function saveToken(token: string): void {
-  if (typeof window !== 'undefined') localStorage.setItem('hbp_token', token);
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('hbp_token', token);
+    window.dispatchEvent(new Event('authchange'));
+  }
+}
+
+export function isAuthenticated(): boolean {
+  if (typeof window === 'undefined') return false;
+  return !!localStorage.getItem('hbp_token');
 }
 
 async function request<T>(

@@ -40,4 +40,16 @@ public sealed class RoomInventory : Entity
         AvailableRooms = Math.Min(TotalRooms, AvailableRooms + count);
         SetUpdatedAt();
     }
+
+    /// <summary>
+    /// Updates the total room count. Available rooms are adjusted:
+    /// increasing total frees up rooms; decreasing respects already-booked rooms.
+    /// </summary>
+    public void UpdateTotalRooms(int newTotal)
+    {
+        var booked = TotalRooms - AvailableRooms;        // rooms already reserved
+        TotalRooms = newTotal;
+        AvailableRooms = Math.Max(0, newTotal - booked); // respect existing bookings
+        SetUpdatedAt();
+    }
 }

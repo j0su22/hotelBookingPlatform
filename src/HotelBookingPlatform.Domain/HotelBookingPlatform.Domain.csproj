@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- INotification interface only — Domain layer does not reference MediatR implementation -->
+    <PackageReference Include="MediatR" Version="14.1.0" />
+  </ItemGroup>
+
 </Project>

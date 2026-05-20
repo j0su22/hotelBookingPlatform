@@ -33,6 +33,7 @@ public static class DependencyInjection
         services.AddScoped<IRatePlanReadRepository, RatePlanReadRepository>();
         services.AddScoped<IAvailabilityReadRepository, AvailabilityReadRepository>();
         services.AddScoped<IBookingReadRepository, BookingReadRepository>();
+        services.AddScoped<IInventoryReadRepository, InventoryReadRepository>();
 
         // Seeder
         services.AddScoped<DataSeeder>();
